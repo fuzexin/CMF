@@ -71,7 +71,9 @@ def load_loc_data(args):
         labels = torch.LongTensor(labels)#.unsqueeze(-1)
     else:
         labels = label_dict['label'] 
+        # format the multilabel data in binary formal.
         mlb = MultiLabelBinarizer()
+        # labels 20, event type
         labels = mlb.fit_transform(labels)
         labels = torch.FloatTensor(labels)
         class_weight = labels.mean(0)

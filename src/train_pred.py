@@ -1,3 +1,9 @@
+# import debugpy
+# # Allow other computers to attach to debugpy at this IP address and port.
+# debugpy.listen(('172.20.201.90', 5678))
+# # Pause the program until a remote debugger is attached
+# debugpy.wait_for_client()
+
 def warn(*args, **kwargs):
     pass
 import warnings
@@ -97,6 +103,7 @@ os.makedirs('explain', exist_ok=True)
 os.makedirs('explain/' + args.dataset, exist_ok=True)
 def prepare(args):
     if args.model == 'cmf':
+        # modified emb_dim=300 -> 100
         model = CMF(args.n_hidden, data_dict['num_ents'], data_dict['num_rels'], num_class=data_dict['num_class'], seq_len=args.seq_len, 
                         use_gru=args.use_gru,maxpool=args.maxpool, class_weight=class_weight,weight_loss=args.weight_loss, 
                         n_label=args.n_evt, emb_dim=300,device=device, multiclass=args.multiclass,emb_mod='mean',node_layer=args.node_layer,text_dim=args.textdim)
@@ -105,7 +112,7 @@ def prepare(args):
         model.doc_embeds = doc_embeds 
      
     model_name = model.__class__.__name__
-    token = model_name + 'lr'+str(args.lr) + 'wd'+str(args.weight_decay) + 'dp' + str(args.dropout) + 'sl' + str(args.seq_len) + 'h' + str(args.horizon) + 'hd' + str(args.n_hidden) + 'p'+str(args.patience) + 'tr'+str(args.train) 
+    token = model_name + 'lr'+str(args.lr) + 'wd'+str(args.weight_decay) + 'dp' + str(args.dropout) + 'sl' + str(args.seq_len) + 'h' + str(args.horizon) + 'h d' + str(args.n_hidden) + 'p'+str(args.patience) + 'tr'+str(args.train) 
     if args.shuffle:
         token += '-s'
     if args.weight_loss:
