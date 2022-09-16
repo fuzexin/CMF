@@ -1,8 +1,8 @@
-import debugpy
-# Allow other computers to attach to debugpy at this IP address and port.
-debugpy.listen(('172.20.201.90', 5678))
-# Pause the program until a remote debugger is attached
-debugpy.wait_for_client()
+# import debugpy
+# # Allow other computers to attach to debugpy at this IP address and port.
+# debugpy.listen(('172.20.201.90', 5678))
+# # Pause the program until a remote debugger is attached
+# debugpy.wait_for_client()
 
 
 import pandas as pd
@@ -79,6 +79,7 @@ def get_big_graph_w_idx(data, edge_indices):
 
 def comp_deg_norm(g):
     in_deg = g.in_degrees(range(g.number_of_nodes())).float()
+    # make in-degree 0 to 1 
     in_deg[torch.nonzero(in_deg == 0, as_tuple=False).view(-1)] = 1
     norm = 1.0 / in_deg
     return norm
@@ -129,7 +130,11 @@ def data_count(data, depos_path):
             else:
                 day_count = np.zeros(len(cameo_data['code']), dtype= float)
                 for one_data in day_data:
-                    day_count[cameo_dict[one_data[2]]] += 1
+                    # day_count[cameo_dict[one_data[2]]] += 1
+                    # change for NumSources
+                    day_count[cameo_dict[one_data[2]]] += one_data[5]
+                    # change for AvgTone
+                    # day_count[cameo_dict[one_data[2]]] += one_data[6]
                 count_data.append(day_count)
                 
                 day_data.clear()
@@ -211,7 +216,6 @@ def data_label(data, depos_dir):
     # record one day's text embedding id, order required.
     day_text_id = []
     # i record loc, j record every piece of data
-    i = 0
     for i in range(len(data)):
         date_flag = data[i][0][-1]
         j = 0
@@ -237,7 +241,7 @@ def data_label(data, depos_dir):
                 for one_data in day_data:
                     # label
                     root_code = int(one_data[2][0:2])-1
-                    day_dup[root_code] = day_dup.setdefault(root_code,0) + 1
+                    day_dup[root_code] = day_dup.setdefault(root_code, 0) + 1
 
                 label_dup.append(day_dup)
                 
@@ -265,25 +269,25 @@ def data_graph(data, depos_dir):
 
     # graph list for storaging graph data
     graph_list = []
+    
+    begin_index = 0
     for loc_data in data:
         # record for the first index of the same date data
         first_index = 0
-        for i in range(len(loc_data)):
-            if loc_data[i][-1] != loc_data[first_index][-1]:
+        for i in range(len(loc_data)+1):
+            if i == len(loc_data) or loc_data[i][-1] != loc_data[first_index][-1] :
                 # data[i][-1] means the i-th data's EventDate
                 
                 # generate a graph for the same date data
-                g1 = gen_graph(loc_data[first_index:i], list(range(first_index,i)), depos_dir)
+                g1 = gen_graph(loc_data[first_index:i], list(range(begin_index, begin_index +i-first_index)), depos_dir)
 
                 # arrange to the graph list
                 graph_list.append(g1)
-
+                
                 # set for next date
+                begin_index += i - first_index
                 first_index = i
         
-        # in the end, we shall process the tail data specially
-        g1 = gen_graph(loc_data[first_index:len(loc_data)], list(range(first_index, len(loc_data))), depos_dir)
-        graph_list.append(g1)
 
     # check the graph list data
     logging.debug(graph_list)
@@ -294,17 +298,16 @@ def data_graph(data, depos_dir):
     
 
 
-
-
 if __name__ == "__main__":
     
     # parameters setting
     # there are many cities in one country in implementation of CMF
-    loc_list = ["Abuja", "Alexandria", 'Buhari',"Cairo", "Lagos"]
+    # loc_list = ["Abuja", "Alexandria", 'Buhari',"Cairo", "Lagos"] # EG
+    loc_list = ["Bangkok", "ChiangMai", 'ChiangRai',"Pattaya", "Phuket"] # THAI
     # where to deposit all generated data file
-    deposit_dir = "/data/fuzexin/Program/CMF/code/data/EG2"
+    deposit_dir = "/data/fuzexin/Program/CMF/code/data/THAI_NumS"
     # GDELT data dir
-    gdelt_dir = r"/data/fuzexin/Program/CMF/code/data/EG2/GDELTData"
+    gdelt_dir = r"/data/fuzexin/Program/CMF/code/data/THAI/GDELTData"
     # sen2vec model path
     model_path = r'/data/fuzexin/Program/CMF/code/data/THAI/s2v_300.bin'
 
@@ -322,7 +325,7 @@ if __name__ == "__main__":
     # loc_entity2id(data, os.path.join(deposit_dir, 'loc_entity2id.txt'))
     
     """ 3, get data_count.pkl """
-    # data_count(data, os.path.join(deposit_dir, 'data_count.pkl'))
+    data_count(data, os.path.join(deposit_dir, 'data_count.pkl'))
 
     """ 4, get loc_text_emb.pkl """
     # text_emb(data, deposit_dir, model_path)
@@ -331,6 +334,6 @@ if __name__ == "__main__":
     data_label(data, deposit_dir)
 
     """ 5, data_graph.bin """
-    data_graph(data, deposit_dir)
+    # data_graph(data, deposit_dir)
 
     

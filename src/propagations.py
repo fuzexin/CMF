@@ -62,6 +62,7 @@ class EventMessagePassingEdge(nn.Module):
         
     def forward(self, g, ext_feature):  
         def apply_edge(edges):
+            # subject, rel, object
             evt = torch.cat([edges.src['h'], edges.data['e_h'], edges.dst['h']], dim=1)
             e_h = self.fc1(self.dropout(evt))
             eh_w_doc = self.dropout(torch.cat((e_h, self.ext_feature),dim=-1))

@@ -41,7 +41,7 @@ def getChainData(start_date, end_date, city_name, city_ADM1Code, base_dir):
     client=Client(host='172.20.201.131',port=9000,user='default',password='1',database='gdelt')
     iter_date = start_date
     data = []
-    while(iter_date < end_date):
+    while(iter_date <= end_date):
         get_data_sql = data_sql.format(get_date=str(iter_date),ADM1Code=city_ADM1Code)
         event_data = client.execute(get_data_sql)
         if len(event_data)<1:
@@ -49,9 +49,15 @@ def getChainData(start_date, end_date, city_name, city_ADM1Code, base_dir):
             continue
         
         for i in range(len(event_data)):
-            # process allnames
-            if len(event_data[i][4]) == 0:
+            
+            continue_flag = False
+            for j in range(1,5):
+                if len(event_data[i][j]) == 0 :
+                    continue_flag = True
+                    break
+            if continue_flag == True:
                 continue
+            # process allnames
             all_names = []
             for one_name in  event_data[i][4].split(';'):
                 all_names.append(one_name.split(',')[0])

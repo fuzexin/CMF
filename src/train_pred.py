@@ -1,8 +1,8 @@
-# import debugpy
-# # Allow other computers to attach to debugpy at this IP address and port.
-# debugpy.listen(('172.20.201.90', 5678))
-# # Pause the program until a remote debugger is attached
-# debugpy.wait_for_client()
+import debugpy
+# Allow other computers to attach to debugpy at this IP address and port.
+debugpy.listen(('172.20.201.90', 5678))
+# Pause the program until a remote debugger is attached
+debugpy.wait_for_client()
 
 def warn(*args, **kwargs):
     pass
@@ -64,7 +64,7 @@ from data import *
 import utils
 
 use_cuda = args.gpu >= 0 and torch.cuda.is_available()
-np.random.seed(args.seed)
+np.random.seed(args.seed) 
 torch.manual_seed(args.seed) 
 device = torch.device('cuda' if use_cuda else 'cpu')
 print("cuda:",use_cuda,'device:',device)
@@ -154,6 +154,7 @@ def train(data_loader, data):
         time_set, loc_set, y  = batch
         loss, _, _ , _= model(time_set, loc_set, y)
         loss.backward()
+        # clip gradient is used to avoid gradient explosion
         torch.nn.utils.clip_grad_norm_(
             model.parameters(), args.grad_norm)  # clip gradients
         optimizer.step()
