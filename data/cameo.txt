@@ -260,6 +260,7 @@
 1722	Ban political parties or politicians
 1723	Impose curfew
 1724	Impose state of emergency or martial law
+1725	Impose state of emergency or martial law
 173	Arrest, detain, or charge with legal action 
 174	Expel or deport individuals
 175	Use tactics of violent repression  

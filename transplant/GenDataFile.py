@@ -130,11 +130,12 @@ def data_count(data, depos_path):
             else:
                 day_count = np.zeros(len(cameo_data['code']), dtype= float)
                 for one_data in day_data:
-                    # day_count[cameo_dict[one_data[2]]] += 1
+                    day_count[cameo_dict[one_data[2]]] += 1
                     # change for NumSources
-                    day_count[cameo_dict[one_data[2]]] += one_data[5]
+                    # day_count[cameo_dict[one_data[2]]] += one_data[5]
                     # change for AvgTone
                     # day_count[cameo_dict[one_data[2]]] += one_data[6]
+
                 count_data.append(day_count)
                 
                 day_data.clear()
@@ -303,16 +304,20 @@ if __name__ == "__main__":
     # parameters setting
     # there are many cities in one country in implementation of CMF
     # loc_list = ["Abuja", "Alexandria", 'Buhari',"Cairo", "Lagos"] # EG
-    loc_list = ["Bangkok", "ChiangMai", 'ChiangRai',"Pattaya", "Phuket"] # THAI
+    # loc_list = ["Bangkok", "ChiangMai", 'ChiangRai',"Pattaya", "Phuket"] # THAI
+    # loc_list = ["Moscow", "Sankt-Petersburg"] # Russia
+    # loc_list = ['Kobe', 'Nagoya', 'Osaka', 'Tokyo', 'Yokohama'] # Japan
+    loc_list = ['Bangalore', 'Bombay', 'Calcutta', 'Chennai', 'New Delhi'] # India
+
     # where to deposit all generated data file
-    deposit_dir = "/data/fuzexin/Program/CMF/code/data/THAI_NumS"
+    deposit_dir = "/data/fuzexin/Program/CMF/code/data/India"
     # GDELT data dir
-    gdelt_dir = r"/data/fuzexin/Program/CMF/code/data/THAI/GDELTData"
+    gdelt_dir = r"/data/fuzexin/Program/CMF/code/data/India/GDELTData"
     # sen2vec model path
     model_path = r'/data/fuzexin/Program/CMF/code/data/THAI/s2v_300.bin'
 
     """ 1, get loc2id.txt """
-    # loc2id(loc_list, os.path.join(deposit_dir, 'loc2id.txt'))
+    loc2id(loc_list, os.path.join(deposit_dir, 'loc2id.txt'))
     
     # get the GDELT data
     data = []
@@ -322,18 +327,18 @@ if __name__ == "__main__":
             data.append(pickle.load(f))
     
     """ 2, get loc_entity2id.txt """
-    # loc_entity2id(data, os.path.join(deposit_dir, 'loc_entity2id.txt'))
+    loc_entity2id(data, os.path.join(deposit_dir, 'loc_entity2id.txt'))
     
     """ 3, get data_count.pkl """
     data_count(data, os.path.join(deposit_dir, 'data_count.pkl'))
 
     """ 4, get loc_text_emb.pkl """
-    # text_emb(data, deposit_dir, model_path)
+    text_emb(data, deposit_dir, model_path)
     
     """ 5, get data_label.pkl """
     data_label(data, deposit_dir)
 
-    """ 5, data_graph.bin """
-    # data_graph(data, deposit_dir)
+    """ 6, data_graph.bin """
+    data_graph(data, deposit_dir)
 
     
