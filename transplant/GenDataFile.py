@@ -305,14 +305,14 @@ if __name__ == "__main__":
     # there are many cities in one country in implementation of CMF
     # loc_list = ["Abuja", "Alexandria", 'Buhari',"Cairo", "Lagos"] # EG
     # loc_list = ["Bangkok", "ChiangMai", 'ChiangRai',"Pattaya", "Phuket"] # THAI
-    # loc_list = ["Moscow", "Sankt-Petersburg"] # Russia
+    loc_list = ["Moscow", "Sankt-Petersburg"] # Russia
     # loc_list = ['Kobe', 'Nagoya', 'Osaka', 'Tokyo', 'Yokohama'] # Japan
-    loc_list = ['Bangalore', 'Bombay', 'Calcutta', 'Chennai', 'New Delhi'] # India
+    # loc_list = ['Bangalore', 'Bombay', 'Calcutta', 'Chennai', 'New Delhi'] # India
 
     # where to deposit all generated data file
-    deposit_dir = "/data/fuzexin/Program/CMF/code/data/India"
+    deposit_dir = "/data/fuzexin/Program/CMF/code/data/Russia"
     # GDELT data dir
-    gdelt_dir = r"/data/fuzexin/Program/CMF/code/data/India/GDELTData"
+    gdelt_dir = r"/data/fuzexin/Program/CMF/code/data/Russia/GDELTData"
     # sen2vec model path
     model_path = r'/data/fuzexin/Program/CMF/code/data/THAI/s2v_300.bin'
 
