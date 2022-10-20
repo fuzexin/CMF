@@ -90,6 +90,7 @@ def load_loc_data(args):
     print('class_weight',class_weight)
     r['class_weight'] = class_weight
 
+    # down-sampling means: decrease quantity of negtive samples
     if args.spl and r['num_class'] == 1:
         print('=============down sampling==============')
         if not os.path.exists(args.path + args.dataset + '/down-sampling{}.pkl'.format(args.eid)):

@@ -1,6 +1,6 @@
 # import debugpy
 # # Allow other computers to attach to debugpy at this IP address and port.
-# debugpy.listen(('172.20.201.90', 5678))
+# debugpy.listen(('172.20.201.133', 5678))
 # # Pause the program until a remote debugger is attached
 # debugpy.wait_for_client()
 

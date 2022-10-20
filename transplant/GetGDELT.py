@@ -26,10 +26,10 @@ SQL EXMAPLE:
 
 data_sql = \
     '''
-        SELECT GlobalEventID, Actor1Name, EventCode, Actor2Name, AllNames, EventDate
+        SELECT Actor1Name, EventCode, Actor2Name, AllNames, EventDate
         from (SELECT GlobalEventID, Actor1Name, EventCode,Actor2Name,SOURCEURL, EventDate
                 FROM gdelt.event 
-                where EventDate = '{get_date}' AND  ActionGeo_ADM1Code = '{ADM1Code}' AND Actor1Name != '' AND EventCode != '' AND Actor2Name != '' AND SOURCEURL != '' ) temp_event 
+                where EventDate = '{get_date}' AND  ActionGeo_ADM1Code = '{ADM1Code}' AND Actor1Geo_ADM1Code = '{ADM1Code}' AND Actor2Geo_ADM1Code = '{ADM1Code}' AND Actor1Name != '' AND EventCode != '' AND Actor2Name != '' AND SOURCEURL != '' ) temp_event 
         inner join (SELECT AllNames, DocumentIdentifier 
                     FROM gdelt.gkg where GkgDate = '{get_date}') temp_gkg
         on temp_event.SOURCEURL == temp_gkg.DocumentIdentifier
@@ -50,7 +50,7 @@ def getChainData(start_date, end_date, country_name, city_name, city_ADM1Code, b
         
         for i in range(len(event_data)):
             if event_data[i][2] not in event_codes or len(event_data[i][1])==0 or \
-                len(event_data[i][3])==0 or len(event_data[i][4])<20:
+                len(event_data[i][3])==0 or len(event_data[i][4])<50:
                 continue
             # process allnames
             all_names = []

@@ -16,8 +16,8 @@ We processed some country based datasets from the ICEWS data. Please find exampl
 The code has been successfully tested in the following environment. (For older dgl versions, you may need to modify the code)
 - Python 3.7.9
 - PyTorch 1.7.0+cu92
-- dgl 0.5.2
-- Sklearn 0.23.2 
+- dgl 0.5.2  conda install -c dglteam dgl-cuda10.2
+- Sklearn 0.23.2  conda install scikit-learn
 
 ## Getting Started
 ### Prepare your code
