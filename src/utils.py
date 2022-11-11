@@ -50,7 +50,7 @@ def load_loc_data(args):
     print('#glist =',len(glist))
     time_of_locs = []
     for iloc in range(num_locs):
-        time_of_locs.append(list(set(sorted([t for l,t in key if l == iloc]))))
+        time_of_locs.append(list(sorted([t for l,t in key if l == iloc])))
     r['time_of_locs'] = time_of_locs
     graph_dict = dict(zip(key,glist))
     r['graph_dict'] = graph_dict
@@ -95,7 +95,7 @@ def load_loc_data(args):
         print('=============down sampling==============')
         if not os.path.exists(args.path + args.dataset + '/down-sampling{}.pkl'.format(args.eid)):
             l = []
-            thr = 0.3
+            thr = 0.5
             print(len(labels),'n labels')
             for i,label in enumerate(labels):
                 if label[0].item() == 0:

@@ -1,6 +1,6 @@
 # import debugpy
 # # Allow other computers to attach to debugpy at this IP address and port.
-# debugpy.listen(('172.20.201.90', 5678))
+# debugpy.listen(('172.20.201.133', 5678))
 # # Pause the program until a remote debugger is attached
 # debugpy.wait_for_client()
 
@@ -27,7 +27,7 @@ def gen_graph(data,edge_indices, depos_dir):
     entity_dict = pd.read_csv(os.path.join(depos_dir, "loc_entity2id.txt"), \
         names=['id','entity_name'], sep='\t')
     entity_dict = dict(zip(list(entity_dict['entity_name']),list(entity_dict['id'])))
-    code_dict = pd.read_csv("/data/fuzexin/Program/CMF/code/data/cameo.txt",sep='\t',\
+    code_dict = pd.read_csv("/nfs/home/fzx/project/CMF/code/data/cameo.txt",sep='\t',\
         names=['code'],dtype=str,index_col=[1])
     logging.debug( range(len(code_dict['code'])))
     code_dict = dict(zip(list(code_dict['code']), range(len(code_dict['code']))))
@@ -112,7 +112,7 @@ def data_count(data, depos_path):
     # get the count for every 292 event type for one day
     # we assume the data is permutating in the date order
     # get cameo data
-    cameo_data = pd.read_csv("/data/fuzexin/Program/CMF/code/data/cameo.txt",sep='\t',\
+    cameo_data = pd.read_csv("/nfs/home/fzx/project/CMF/code/data/cameo.txt",sep='\t',\
         names=['code', 'description'],dtype=str)
     logging.debug( range(len(cameo_data['code'])))
     cameo_dict = dict(zip(list(cameo_data['code']), range(len(cameo_data['code']))))
@@ -244,13 +244,13 @@ def data_label(data, depos_dir):
                     root_code = int(one_data[2][0:2])-1
                     day_dup[root_code] = day_dup.setdefault(root_code, 0) + 1
 
-                label_dup.append(day_dup)
+                label_dup.append(day_dup.copy())
                 
                 # get the label data
                 label.append(list(day_dup.keys()))
                 
                 # get the text_id data
-                text_id.append(np.array(day_text_id))
+                text_id.append(day_text_id.copy())
                 logging.info(f"loc: {i}, date: {date_flag} data has get")
                 # prepare for next day  
                 day_data.clear()
@@ -303,18 +303,18 @@ if __name__ == "__main__":
     
     # parameters setting
     # there are many cities in one country in implementation of CMF
-    # loc_list = ["Abuja", "Alexandria", 'Buhari',"Cairo", "Lagos"] # EG
-    # loc_list = ["Bangkok", "ChiangMai", 'ChiangRai',"Pattaya", "Phuket"] # THAI
-    loc_list = ["Moscow", "Sankt-Petersburg"] # Russia
+    # loc_list = ["Abuja", "Alexandria", 'Buhari',"Cairo", "Lagos"] # EG2
+    # loc_list = ["Bangkok", "ChiangMai", 'ChiangRai',"Pattaya", "Phuket"] # Thailand
+    # loc_list = ["Moscow", "Sankt-Petersburg"] # Russia
     # loc_list = ['Kobe', 'Nagoya', 'Osaka', 'Tokyo', 'Yokohama'] # Japan
-    # loc_list = ['Bangalore', 'Bombay', 'Calcutta', 'Chennai', 'New Delhi'] # India
+    loc_list = ['Bangalore', 'Bombay', 'Calcutta', 'Chennai', 'New Delhi'] # India
 
     # where to deposit all generated data file
-    deposit_dir = "/data/fuzexin/Program/CMF/code/data/Russia"
+    deposit_dir = "/nfs/home/fzx/project/CMF/code/data/India"
     # GDELT data dir
-    gdelt_dir = r"/data/fuzexin/Program/CMF/code/data/Russia/GDELTData"
+    gdelt_dir = r"/nfs/home/fzx/data/EventData/India/2017-2019"
     # sen2vec model path
-    model_path = r'/data/fuzexin/Program/CMF/code/data/THAI/s2v_300.bin'
+    model_path = r'/nfs/home/fzx/project/CMF/code/data/Thailand/s2v_300.bin'
 
     """ 1, get loc2id.txt """
     loc2id(loc_list, os.path.join(deposit_dir, 'loc2id.txt'))

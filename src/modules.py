@@ -52,28 +52,32 @@ class multilevel_learning(nn.Module):
     def forward(self, time_set, loc_set, ent_embeds, rel_embeds, graph_dict, text_dict, count_dict, doc_embeds, time_of_locs):
         key_list = []
         len_non_zero = []
-        nonzero_idx = torch.nonzero(time_set, as_tuple=False).view(-1)
-        time_set = time_set[nonzero_idx]   
+        non_zero_index = []
+        # nonzero_idx = torch.nonzero(time_set, as_tuple=False).view(-1)
+        # time_set = time_set[nonzero_idx]   
         time_set = time_set.cpu().numpy()
         loc_set = loc_set.cpu().numpy()
         for i in range(len(time_set)):
             tim = time_set[i]
             loc = loc_set[i]
-            try:
-                length = time_of_locs[loc].index(tim)
-            except:
-                length = self.seq_len if tim >= self.seq_len else tim
+            length = time_of_locs[loc].index(tim)
             if self.seq_len <= length:
                 hist_time = time_of_locs[loc][length - self.seq_len:length]
-                key_list.append(list(zip([loc]*len(hist_time),hist_time)))
-                len_non_zero.append(self.seq_len)
+                hist_time = [x for x in hist_time if x>tim-self.seq_len]
+                length = len(hist_time)
+                if length > 0:
+                    non_zero_index.append(i)
+                    len_non_zero.append(length)
+                    key_list.append(list(zip([loc]*len(hist_time),hist_time)))
             else:
                 hist_time = time_of_locs[loc][:length]
-                key_list.append(list(zip([loc]*len(hist_time),hist_time)))
-                len_non_zero.append(length)
-        if 0 in len_non_zero:
-            len_non_zero = len_non_zero[:len_non_zero.index(0)]
-            key_list = key_list[:len(len_non_zero)]
+                hist_time = [x for x in hist_time if x>tim-self.seq_len]
+                length = len(hist_time)
+                if length > 0:
+                    non_zero_index.append(i)
+                    len_non_zero.append(length)
+                    key_list.append(list(zip([loc]*len(hist_time),hist_time)))
+
          
         all_hist = [item for sublist in key_list for item in sublist]
         g_list = [graph_dict[key] for key in all_hist]
@@ -144,7 +148,7 @@ class multilevel_learning(nn.Module):
             start_idx = start_idx+len_non_zero[i]
  
         embed_seq_tensor = self.dropout(embed_seq_tensor)
-        return embed_seq_tensor, len_non_zero
+        return embed_seq_tensor, len_non_zero, non_zero_index
  
     def explain(self, time_set, loc_set, ent_embeds, rel_embeds, graph_dict, text_dict, count_dict, doc_embeds, time_of_locs, ref_embeds, label_idx):
         key_list = []

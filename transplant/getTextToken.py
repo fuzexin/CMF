@@ -41,7 +41,7 @@ def tokenize_pipeline2(text):
     return words  
 
 def get_stopwords_basic():
-    file = '/data/fuzexin/Program/CMF/code/data/stopwords-en-basic.txt'
+    file = '/nfs/home/fzx/project/CMF/code/data/stopwords-en-basic.txt'
     assert check_exist(file), "can not find stopwords file {}".format(file)
     return open(file).read().split('\n')
 

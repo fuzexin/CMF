@@ -82,8 +82,8 @@ class CMF(nn.Module):
         return loss, pred, y_true, idx
  
     def get_pred_embeds(self, time_set, loc_set, graph_dict):
-        sorted_t, idx = time_set.sort(0, descending=True)  #TODO
-        embed_seq_tensor, len_non_zero = self.aggregator(sorted_t, loc_set[idx], self.ent_embeds, 
+        # sorted_t, idx = time_set.sort(0, descending=True)  #TODO
+        embed_seq_tensor, len_non_zero, idx = self.aggregator(time_set, loc_set, self.ent_embeds, 
                                     self.rel_embeds,
                                     graph_dict,
                                     self.text_dict,
@@ -98,6 +98,10 @@ class CMF(nn.Module):
         feature = feature.squeeze(0)
         feature = torch.cat((feature, torch.zeros(len(time_set) - len(feature), feature.size(-1)).to(self.device)), dim=0)
         pred = self.out_layer(feature)
+        if len(idx)<len(time_set):
+            for x in range(len(time_set)):
+                if x not in idx:
+                    idx.append(x)
         return pred, idx, feature
  
     def get_pred_embeds_w_temporal(self, time_set, loc_set, graph_dict):
