@@ -25,7 +25,7 @@ def process_texts(texts):
         l.append(tokenize_pipeline2(t))
         i += 1
         if i % 1000 == 0:
-            logging.info("has processed {} text".format(i))
+            print("\rhas processed {} text".format(i),end='')
     return l
 
 def tokenize_pipeline2(text):

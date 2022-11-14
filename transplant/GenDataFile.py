@@ -1,17 +1,19 @@
-# import debugpy
-# # Allow other computers to attach to debugpy at this IP address and port.
-# debugpy.listen(('172.20.201.133', 5678))
-# # Pause the program until a remote debugger is attached
-# debugpy.wait_for_client()
+import debugpy
+# Allow other computers to attach to debugpy at this IP address and port.
+debugpy.listen(('172.20.201.133', 5678))
+# Pause the program until a remote debugger is attached
+debugpy.wait_for_client()
 
 
 import pandas as pd
 import logging, pickle, os
 import numpy as np
 import sent2vec
-import datetime,dgl,torch
+import datetime,dgl,torch,time
 from dgl.data.utils import save_graphs
 import getTextToken
+
+from concurrent import futures
 
 def warn(*args, **kwargs):
     pass
@@ -251,7 +253,7 @@ def data_label(data, depos_dir):
                 
                 # get the text_id data
                 text_id.append(day_text_id.copy())
-                logging.info(f"loc: {i}, date: {date_flag} data has get")
+                print(f"\rloc: {i}, date: {date_flag} data has get",end='')
                 # prepare for next day  
                 day_data.clear()
                 day_text_id.clear()
@@ -294,51 +296,96 @@ def data_graph(data, depos_dir):
     logging.debug(graph_list)
 
     # save the graph data
-    save_graphs(os.path.join(deposit_dir, 'data_graph.bin'), graph_list)
+    save_graphs(os.path.join(depos_dir, 'data_graph.bin'), graph_list)
     logging.info('data_graph.bin OK')
     
+def cmfDataGenerator(dataset_name, loc_list, gdelt_dir, model_path, deposit_dir):
+
+        time1 = time.time()
+        print(f'handling {dataset_name}')
+        """ 1, get loc2id.txt """
+        loc2id(loc_list, os.path.join(deposit_dir, 'loc2id.txt'))
+        
+        # get the GDELT data
+        data = []
+        for one_loc in loc_list:
+            one_path = os.path.join(gdelt_dir, one_loc+'.pkl')
+            with open (one_path,'rb') as f:
+                data.append(pickle.load(f))
+        
+        """ 2, get loc_entity2id.txt """
+        loc_entity2id(data, os.path.join(deposit_dir, 'loc_entity2id.txt'))
+        
+        """ 3, get data_count.pkl """
+        data_count(data, os.path.join(deposit_dir, 'data_count.pkl'))
+
+        """ 4, get loc_text_emb.pkl """
+        text_emb(data, deposit_dir, model_path)
+        
+        """ 5, get data_label.pkl """
+        data_label(data, deposit_dir)
+
+        """ 6, data_graph.bin """
+        data_graph(data, deposit_dir)  
+
+        handling_time = (time.time() - time1)/60
+        return handling_time 
 
 
 if __name__ == "__main__":
     
-    # parameters setting
-    # there are many cities in one country in implementation of CMF
-    # loc_list = ["Abuja", "Alexandria", 'Buhari',"Cairo", "Lagos"] # EG2
-    # loc_list = ["Bangkok", "ChiangMai", 'ChiangRai',"Pattaya", "Phuket"] # Thailand
-    # loc_list = ["Moscow", "Sankt-Petersburg"] # Russia
-    # loc_list = ['Kobe', 'Nagoya', 'Osaka', 'Tokyo', 'Yokohama'] # Japan
-    loc_list = ['Bangalore', 'Bombay', 'Calcutta', 'Chennai', 'New Delhi'] # India
+    time1 = time.time()
+    dataset_list = {
+        "EG3":['Abuja', 'Cairo', 'Lagos'],
+        "Thailand2":['Bangkok'],
+        "Japan2":['Tokyo'],
+        "Taiwan":['Taipei'],
+        "America":["Chicago", 'New York', "San Francisco", 'Washington']
+    }
 
-    # where to deposit all generated data file
-    deposit_dir = "/nfs/home/fzx/project/CMF/code/data/India"
-    # GDELT data dir
-    gdelt_dir = r"/nfs/home/fzx/data/EventData/India/2017-2019"
-    # sen2vec model path
-    model_path = r'/nfs/home/fzx/project/CMF/code/data/Thailand/s2v_300.bin'
+    with futures.ProcessPoolExecutor(max_workers=5) as excutor:
+        # future list
+        to_do_list = {}
+        for one_dataset in dataset_list:
+            # where to deposit all generated data file
+            deposit_dir = "/nfs/home/fzx/project/CMF/code/data/{0}".format(one_dataset)
+            # GDELT data dir
+            gdelt_dir = "/nfs/home/fzx/data/EventData/{0}/2017-2021".format(one_dataset)
+            # sen2vec model path
+            model_path = r'/nfs/home/fzx/project/CMF/code/data/Thailand/s2v_300.bin'
 
-    """ 1, get loc2id.txt """
-    loc2id(loc_list, os.path.join(deposit_dir, 'loc2id.txt'))
-    
-    # get the GDELT data
-    data = []
-    for one_loc in loc_list:
-        one_path = os.path.join(gdelt_dir, one_loc+'.pkl')
-        with open (one_path,'rb') as f:
-            data.append(pickle.load(f))
-    
-    """ 2, get loc_entity2id.txt """
-    loc_entity2id(data, os.path.join(deposit_dir, 'loc_entity2id.txt'))
-    
-    """ 3, get data_count.pkl """
-    data_count(data, os.path.join(deposit_dir, 'data_count.pkl'))
+            # solve path problems
+            if not os.path.exists(gdelt_dir):
+                logging.info(f'{gdelt_dir} is not exist!')
+                exit()
+            if not os.path.exists(deposit_dir):
+                os.mkdir(deposit_dir)
+            loc_list = dataset_list[one_dataset]
 
-    """ 4, get loc_text_emb.pkl """
-    text_emb(data, deposit_dir, model_path)
+            # submit functions that need process concurrent to excutor, excutor wrap it as Future class
+            future = excutor.submit(cmfDataGenerator, one_dataset, loc_list, gdelt_dir, model_path, deposit_dir)
+            to_do_list[future] = one_dataset
+        
+        done_iter = futures.as_completed(to_do_list)
+        done_map = {}
+        for future in done_iter:
+            handling_time = future.result()
+            done_map[to_do_list[future]] = handling_time
+        
+        excutor.shutdown()
     
-    """ 5, get data_label.pkl """
-    data_label(data, deposit_dir)
+    print(done_map)
+    
+    total_time = (time.time()- time1)/60
 
-    """ 6, data_graph.bin """
-    data_graph(data, deposit_dir)
+    print(f"total time {total_time} min")
+
+
+            
+        
+
+
+        
+
 
     
