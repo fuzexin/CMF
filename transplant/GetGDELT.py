@@ -1,5 +1,5 @@
 """
-    get GDELT data for GLEAN model, structure as data = [[day1], [day2]]
+    get GDELT data for GLEAN, CMF, etc. model, structure as data = [[day1], [day2]]
     day1 = [[Actor1Name, EventCode, Actor2Name, AllNames], ...]
     获取某一段时间内的训练数据
     Author: zxf
@@ -123,6 +123,8 @@ def getChainData(start_date, end_date, country_name, city_name, city_ADM1Code, b
         if part4 not in four_part_set:
             four_part_set.add(part4)
             new_data.append(data[i])
+    
+    data = new_data
 
     # storage the data
     deposit_dir = os.path.join(base_dir, country_name)
